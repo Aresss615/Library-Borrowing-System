@@ -2,21 +2,26 @@ package com.library.view;
 
 import com.library.model.BorrowRecord;
 import com.library.service.BorrowService;
+import com.library.utils.AlertHelper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
- * Reports view: tabbed interface showing borrowed, returned, and overdue report tables.
+ * Reports view with tabbed report tables and CSV export.
  */
 public class ReportsView extends VBox {
 
     private final BorrowService borrowService = new BorrowService();
+    private TabPane tabPane;
 
     public ReportsView() {
         setSpacing(20);
@@ -27,53 +32,61 @@ public class ReportsView extends VBox {
     private void build() {
         Label title = new Label("Reports");
         title.getStyleClass().add("page-title");
-        Label subtitle = new Label("View detailed borrowing reports");
+        Label subtitle = new Label("View detailed borrowing reports and export data");
         subtitle.getStyleClass().add("page-subtitle");
 
-        // Tab pane for different report types
-        TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        VBox.setVgrow(tabPane, Priority.ALWAYS);
-
-        // Borrowed report tab
-        Tab borrowedTab = new Tab("📖 Borrowed Books");
-        borrowedTab.setContent(buildReportTable(borrowService.getBorrowedRecords(), "borrowed"));
-
-        // Returned report tab
-        Tab returnedTab = new Tab("✅ Returned Books");
-        returnedTab.setContent(buildReportTable(borrowService.getReturnedRecords(), "returned"));
-
-        // Overdue report tab
-        Tab overdueTab = new Tab("⚠️ Overdue Books");
-        overdueTab.setContent(buildReportTable(borrowService.getOverdueRecords(), "overdue"));
-
-        // All records tab
-        Tab allTab = new Tab("📋 All Records");
-        allTab.setContent(buildReportTable(borrowService.getAllRecords(), "all"));
-
-        tabPane.getTabs().addAll(borrowedTab, returnedTab, overdueTab, allTab);
-
-        // Summary cards
-        HBox summary = new HBox(16);
-        summary.setAlignment(Pos.CENTER_LEFT);
-
+        // ── Summary cards ──
         int borrowed = borrowService.getBorrowedRecords().size();
         int returned = borrowService.getReturnedRecords().size();
         int overdue  = borrowService.getOverdueRecords().size();
 
+        HBox summary = new HBox(16);
+        summary.setAlignment(Pos.CENTER_LEFT);
         summary.getChildren().addAll(
-            createMiniCard("Currently Borrowed", String.valueOf(borrowed), "#007AFF"),
-            createMiniCard("Total Returned",     String.valueOf(returned), "#34C759"),
-            createMiniCard("Overdue",            String.valueOf(overdue),  "#FF3B30")
+                createMiniCard("Currently Borrowed", String.valueOf(borrowed), "#007AFF"),
+                createMiniCard("Total Returned",     String.valueOf(returned), "#34C759"),
+                createMiniCard("Overdue",            String.valueOf(overdue),  "#FF3B30")
         );
 
-        getChildren().addAll(title, subtitle, summary, tabPane);
+        // ── Export button ──
+        Button exportBtn = new Button("Export to CSV");
+        exportBtn.getStyleClass().add("btn-secondary");
+        exportBtn.setOnAction(e -> handleExport());
+
+        HBox toolbar = new HBox(exportBtn);
+        toolbar.setAlignment(Pos.CENTER_RIGHT);
+        toolbar.setPadding(new Insets(0, 0, 4, 0));
+
+        // ── Tab pane ──
+        tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        VBox.setVgrow(tabPane, Priority.ALWAYS);
+
+        Tab borrowedTab = new Tab("Borrowed");
+        borrowedTab.setContent(buildReportTable(borrowService.getBorrowedRecords()));
+
+        Tab returnedTab = new Tab("Returned");
+        returnedTab.setContent(buildReportTable(borrowService.getReturnedRecords()));
+
+        Tab overdueTab = new Tab("Overdue");
+        overdueTab.setContent(buildReportTable(borrowService.getOverdueRecords()));
+
+        Tab allTab = new Tab("All Records");
+        allTab.setContent(buildReportTable(borrowService.getAllRecords()));
+
+        tabPane.getTabs().addAll(borrowedTab, returnedTab, overdueTab, allTab);
+
+        getChildren().addAll(title, subtitle, summary, toolbar, tabPane);
     }
 
-    /** Build a report table for a given list of records */
-    private VBox buildReportTable(List<BorrowRecord> records, String type) {
+    // ── Report table builder ──
+
+    private VBox buildReportTable(List<BorrowRecord> records) {
         VBox container = new VBox(12);
         container.setPadding(new Insets(16));
+
+        Label countLabel = new Label(records.size() + " record(s)");
+        countLabel.getStyleClass().add("muted-text");
 
         TableView<BorrowRecord> table = new TableView<>();
         table.setItems(FXCollections.observableArrayList(records));
@@ -83,7 +96,7 @@ public class ReportsView extends VBox {
 
         TableColumn<BorrowRecord, String> colId = new TableColumn<>("#");
         colId.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getId())));
-        colId.setMinWidth(40);
+        colId.setMaxWidth(50);
 
         TableColumn<BorrowRecord, String> colUser = new TableColumn<>("User");
         colUser.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserName()));
@@ -101,7 +114,7 @@ public class ReportsView extends VBox {
 
         TableColumn<BorrowRecord, String> colReturn = new TableColumn<>("Return Date");
         colReturn.setCellValueFactory(c -> new SimpleStringProperty(
-            c.getValue().getReturnDate() != null ? c.getValue().getReturnDate().toString() : "—"));
+                c.getValue().getReturnDate() != null ? c.getValue().getReturnDate().toString() : "\u2014"));
 
         TableColumn<BorrowRecord, String> colStatus = new TableColumn<>("Status");
         colStatus.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getStatusDisplay()));
@@ -125,19 +138,75 @@ public class ReportsView extends VBox {
         });
 
         TableColumn<BorrowRecord, String> colFine = new TableColumn<>("Fine");
-        colFine.setCellValueFactory(c -> new SimpleStringProperty("$" + c.getValue().calculateFine().toString()));
+        colFine.setCellValueFactory(c -> new SimpleStringProperty("$" + c.getValue().calculateFine().toPlainString()));
 
         table.getColumns().addAll(colId, colUser, colBook, colBorrow, colDue, colReturn, colStatus, colFine);
-
-        // Record count
-        Label countLabel = new Label(records.size() + " record(s)");
-        countLabel.getStyleClass().add("muted-text");
 
         container.getChildren().addAll(countLabel, table);
         return container;
     }
 
-    /** Create a mini summary card */
+    // ── CSV Export ──
+
+    @SuppressWarnings("unchecked")
+    private void handleExport() {
+        Tab selectedTab = tabPane.getSelectionModel().getSelectedItem();
+        if (selectedTab == null) return;
+
+        VBox content = (VBox) selectedTab.getContent();
+        TableView<BorrowRecord> table = null;
+        for (var node : content.getChildren()) {
+            if (node instanceof TableView<?>) {
+                table = (TableView<BorrowRecord>) node;
+                break;
+            }
+        }
+
+        if (table == null || table.getItems().isEmpty()) {
+            AlertHelper.showWarning("No Data", "No records to export.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export to CSV");
+        fileChooser.setInitialFileName("library_report_" +
+                selectedTab.getText().toLowerCase().replace(" ", "_") + ".csv");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+
+        File file = fileChooser.showSaveDialog(getScene().getWindow());
+        if (file != null) {
+            try (PrintWriter pw = new PrintWriter(file)) {
+                pw.println("ID,User,Book,Borrow Date,Due Date,Return Date,Status,Fine");
+                for (BorrowRecord record : table.getItems()) {
+                    pw.println(String.join(",",
+                            String.valueOf(record.getId()),
+                            escapeCsv(record.getUserName()),
+                            escapeCsv(record.getBookTitle()),
+                            record.getBorrowDate().toString(),
+                            record.getDueDate().toString(),
+                            record.getReturnDate() != null ? record.getReturnDate().toString() : "",
+                            record.getStatusDisplay(),
+                            "$" + record.calculateFine().toPlainString()
+                    ));
+                }
+                AlertHelper.showSuccess("Exported", "Records exported to " + file.getName());
+            } catch (Exception e) {
+                AlertHelper.showError("Export Failed", "Failed to export: " + e.getMessage());
+            }
+        }
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
+    }
+
+    // ── Mini card builder ──
+
     private VBox createMiniCard(String label, String value, String color) {
         VBox card = new VBox(4);
         card.getStyleClass().add("glass-panel");

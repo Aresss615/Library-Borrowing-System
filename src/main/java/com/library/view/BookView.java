@@ -94,8 +94,30 @@ public class BookView extends VBox {
         TableColumn<Book, String> colAvail = new TableColumn<>("Available");
         colAvail.setCellValueFactory(c -> new SimpleStringProperty(
             c.getValue().getAvailableCopies() + " / " + c.getValue().getTotalCopies()));
-        colAvail.setMinWidth(80);
-        colAvail.setStyle("-fx-alignment: CENTER;");
+        colAvail.setMinWidth(90);
+        colAvail.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setStyle("-fx-alignment: CENTER;");
+                } else {
+                    Book book = getTableView().getItems().get(getIndex());
+                    Label badge = new Label(item);
+                    badge.getStyleClass().add("badge");
+                    if (book.getAvailableCopies() == 0) {
+                        badge.getStyleClass().add("badge-overdue");
+                    } else if (book.getAvailableCopies() <= 1) {
+                        badge.getStyleClass().add("badge-low-stock");
+                    } else {
+                        badge.getStyleClass().add("badge-returned");
+                    }
+                    setGraphic(badge);
+                    setStyle("-fx-alignment: CENTER;");
+                }
+            }
+        });
 
         table.getColumns().addAll(colTitle, colAuthor, colISBN, colCategory, colYear, colAvail);
 

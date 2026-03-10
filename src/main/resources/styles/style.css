@@ -650,3 +650,113 @@
 .card-hover {
     -fx-cursor: hand;
 }
+
+/* ── Pill Toggle Bar (Borrow / Return / History) ───────── */
+
+.pill-toggle-bar {
+    -fx-background-color: #F0F0F0;
+    -fx-background-radius: 10;
+    -fx-padding: 3;
+    -fx-spacing: 3;
+}
+
+.pill-toggle {
+    -fx-background-color: transparent;
+    -fx-text-fill: #86868B;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 24;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.pill-toggle:hover {
+    -fx-background-color: #E8E8ED;
+}
+
+.pill-toggle:selected {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #007AFF;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);
+}
+
+/* ── Selection Chip ─────────────────────────────────── */
+
+.selection-chip {
+    -fx-background-color: #E8F0FE;
+    -fx-text-fill: #007AFF;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+}
+
+/* ── Section Title ─────────────────────────────────── */
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1D1D1F;
+    -fx-padding: 0 0 4 0;
+}
+
+/* ── Summary Card ──────────────────────────────────── */
+
+.summary-card {
+    -fx-border-color: #007AFF;
+    -fx-border-width: 0 0 0 4;
+}
+
+.summary-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #86868B;
+    -fx-min-width: 140;
+}
+
+.summary-value {
+    -fx-font-size: 13px;
+    -fx-text-fill: #1D1D1F;
+    -fx-font-weight: bold;
+}
+
+/* ── Warning Text ──────────────────────────────────── */
+
+.warning-text {
+    -fx-text-fill: #FF9500;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 0;
+}
+
+/* ── Large Button Variant ───────────────────────────── */
+
+.btn-large {
+    -fx-padding: 12 32;
+    -fx-font-size: 14px;
+}
+
+/* ── Low Stock Badge ───────────────────────────────── */
+
+.badge-low-stock {
+    -fx-background-color: #FFF3E0;
+    -fx-text-fill: #FF9500;
+}
+
+/* ── Activity Feed Items (Dashboard) ───────────────── */
+
+.activity-item {
+    -fx-padding: 10 0;
+    -fx-border-color: transparent transparent #F0F0F0 transparent;
+    -fx-border-width: 0 0 0.5 0;
+}
+
+.activity-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #1D1D1F;
+}
+
+.activity-time {
+    -fx-font-size: 11px;
+    -fx-text-fill: #AEAEB2;
+}

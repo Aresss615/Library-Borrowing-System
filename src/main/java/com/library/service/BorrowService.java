@@ -16,6 +16,7 @@ import java.util.List;
 public class BorrowService {
 
     private static final int DEFAULT_BORROW_DAYS = 14; // 2 weeks
+    private static final int MAX_BORROWS_PER_USER = 5;  // max active borrows
 
     private final BorrowRecordDAO borrowRecordDAO;
     private final BookDAO bookDAO;
@@ -40,6 +41,12 @@ public class BorrowService {
         // Check if user already has this book borrowed
         if (borrowRecordDAO.hasActiveBorrow(userId, bookId)) {
             return "User already has this book borrowed.";
+        }
+
+        // Check borrow limit
+        int activeCount = borrowRecordDAO.countActiveByUser(userId);
+        if (activeCount >= MAX_BORROWS_PER_USER) {
+            return "User has reached the maximum borrow limit (" + MAX_BORROWS_PER_USER + " books).";
         }
 
         // Create borrow record
@@ -118,5 +125,15 @@ public class BorrowService {
     /** Search records */
     public List<BorrowRecord> searchRecords(String keyword) {
         return borrowRecordDAO.search(keyword);
+    }
+
+    /** Get recent activity records for dashboard */
+    public List<BorrowRecord> getRecentRecords(int limit) {
+        return borrowRecordDAO.findRecent(limit);
+    }
+
+    /** Search active (non-returned) borrow records */
+    public List<BorrowRecord> searchActiveRecords(String keyword) {
+        return borrowRecordDAO.searchActive(keyword);
     }
 }

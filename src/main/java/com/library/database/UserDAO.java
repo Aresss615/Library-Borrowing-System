@@ -192,6 +192,26 @@ public class UserDAO {
         return false;
     }
 
+    /** Search students by name, username, ID, or email */
+    public List<User> searchStudents(String keyword) {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE role = 'STUDENT' AND (full_name LIKE ? OR username LIKE ? OR CAST(id AS CHAR) LIKE ? OR email LIKE ?) ORDER BY full_name";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            String like = "%" + keyword + "%";
+            ps.setString(1, like);
+            ps.setString(2, like);
+            ps.setString(3, like);
+            ps.setString(4, like);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                users.add(mapUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
     // ── Mapper ─────────────────────────────────────────────────
 
     private User mapUser(ResultSet rs) throws SQLException {

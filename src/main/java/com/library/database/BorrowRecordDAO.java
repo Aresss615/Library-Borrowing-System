@@ -257,6 +257,70 @@ public class BorrowRecordDAO {
         return records;
     }
 
+    /** Count active (non-returned) borrows for a specific user */
+    public int countActiveByUser(int userId) {
+        String sql = "SELECT COUNT(*) FROM borrow_records WHERE user_id = ? AND status IN ('BORROWED', 'OVERDUE')";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /** Search active borrow records by user name, username, book title, or record ID */
+    public List<BorrowRecord> searchActive(String keyword) {
+        List<BorrowRecord> records = new ArrayList<>();
+        String sql = """
+            SELECT br.*, u.full_name AS user_name, b.title AS book_title
+            FROM borrow_records br
+            JOIN users u ON br.user_id = u.id
+            JOIN books b ON br.book_id = b.id
+            WHERE br.status IN ('BORROWED', 'OVERDUE')
+            AND (u.full_name LIKE ? OR b.title LIKE ? OR CAST(br.id AS CHAR) LIKE ? OR u.username LIKE ?)
+            ORDER BY br.due_date ASC
+            """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            String like = "%" + keyword + "%";
+            ps.setString(1, like);
+            ps.setString(2, like);
+            ps.setString(3, like);
+            ps.setString(4, like);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                records.add(mapRecord(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+
+    /** Find the most recent borrow records (for dashboard activity feed) */
+    public List<BorrowRecord> findRecent(int limit) {
+        List<BorrowRecord> records = new ArrayList<>();
+        String sql = """
+            SELECT br.*, u.full_name AS user_name, b.title AS book_title
+            FROM borrow_records br
+            JOIN users u ON br.user_id = u.id
+            JOIN books b ON br.book_id = b.id
+            ORDER BY br.updated_at DESC
+            LIMIT ?
+            """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                records.add(mapRecord(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+
     // ── Mapper ─────────────────────────────────────────────────
 
     private BorrowRecord mapRecord(ResultSet rs) throws SQLException {

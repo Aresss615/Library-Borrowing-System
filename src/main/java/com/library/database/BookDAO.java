@@ -177,6 +177,41 @@ public class BookDAO {
         return 0;
     }
 
+    /** Search books with available copies, filtered by keyword */
+    public List<Book> searchAvailable(String keyword) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books WHERE available_copies > 0 AND (title LIKE ? OR author LIKE ? OR isbn LIKE ? OR category LIKE ?) ORDER BY title";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            String like = "%" + keyword + "%";
+            ps.setString(1, like);
+            ps.setString(2, like);
+            ps.setString(3, like);
+            ps.setString(4, like);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(mapBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    /** Find low-stock books (at most 1 copy available out of 2+ total) */
+    public List<Book> findLowStock() {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books WHERE available_copies <= 1 AND total_copies > 1 ORDER BY available_copies ASC, title";
+        try (Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                books.add(mapBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
     // ── Mapper ─────────────────────────────────────────────────
 
     private Book mapBook(ResultSet rs) throws SQLException {
