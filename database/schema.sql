@@ -58,11 +58,11 @@ CREATE TABLE IF NOT EXISTS borrow_records (
 -- ============================================================
 -- Indexes for performance
 -- ============================================================
-CREATE INDEX idx_borrow_user   ON borrow_records(user_id);
-CREATE INDEX idx_borrow_book   ON borrow_records(book_id);
-CREATE INDEX idx_borrow_status ON borrow_records(status);
-CREATE INDEX idx_book_title    ON books(title);
-CREATE INDEX idx_book_author   ON books(author);
+CREATE INDEX IF NOT EXISTS idx_borrow_user   ON borrow_records(user_id);
+CREATE INDEX IF NOT EXISTS idx_borrow_book   ON borrow_records(book_id);
+CREATE INDEX IF NOT EXISTS idx_borrow_status ON borrow_records(status);
+CREATE INDEX IF NOT EXISTS idx_book_title    ON books(title);
+CREATE INDEX IF NOT EXISTS idx_book_author   ON books(author);
 
 -- ============================================================
 -- Sample Data
