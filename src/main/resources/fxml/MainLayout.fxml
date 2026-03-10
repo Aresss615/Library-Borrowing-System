@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<!-- Main Layout: Sidebar navigation + content area -->
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.library.controller.MainController"
+            prefWidth="1200" prefHeight="750"
+            styleClass="root">
+
+    <!-- ── Left Sidebar ──────────────────────────────────── -->
+    <left>
+        <VBox styleClass="sidebar" fx:id="sidebar">
+
+            <!-- App Header -->
+            <VBox styleClass="sidebar-header">
+                <Label text="📚  Library" styleClass="sidebar-app-name" />
+                <Label fx:id="userInfoLabel" text="Administrator" styleClass="sidebar-user-info" />
+            </VBox>
+
+            <!-- Navigation Buttons -->
+            <VBox spacing="2" VBox.vgrow="ALWAYS">
+                <padding><Insets top="12" left="12" right="12" /></padding>
+
+                <Label text="OVERVIEW" styleClass="nav-section-label" />
+
+                <Button fx:id="navDashboard" text="  📊  Dashboard"
+                        styleClass="nav-button" onAction="#showDashboard"
+                        maxWidth="Infinity" alignment="CENTER_LEFT" />
+
+                <Label text="MANAGEMENT" styleClass="nav-section-label" />
+
+                <Button fx:id="navBooks" text="  📖  Books"
+                        styleClass="nav-button" onAction="#showBooks"
+                        maxWidth="Infinity" alignment="CENTER_LEFT" />
+
+                <Button fx:id="navUsers" text="  👥  Users"
+                        styleClass="nav-button" onAction="#showUsers"
+                        maxWidth="Infinity" alignment="CENTER_LEFT" />
+
+                <Button fx:id="navBorrow" text="  🔄  Borrowing"
+                        styleClass="nav-button" onAction="#showBorrowing"
+                        maxWidth="Infinity" alignment="CENTER_LEFT" />
+
+                <Label text="REPORTS" styleClass="nav-section-label" />
+
+                <Button fx:id="navOverdue" text="  ⚠️  Overdue"
+                        styleClass="nav-button" onAction="#showOverdue"
+                        maxWidth="Infinity" alignment="CENTER_LEFT" />
+
+                <Button fx:id="navReports" text="  📋  Reports"
+                        styleClass="nav-button" onAction="#showReports"
+                        maxWidth="Infinity" alignment="CENTER_LEFT" />
+            </VBox>
+
+            <!-- Footer / Logout -->
+            <VBox styleClass="sidebar-footer">
+                <Button text="  🚪  Sign Out"
+                        styleClass="nav-button" onAction="#handleLogout"
+                        maxWidth="Infinity" alignment="CENTER_LEFT" />
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- ── Main Content Area ─────────────────────────────── -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <StackPane fx:id="contentArea" styleClass="content-area" />
+        </ScrollPane>
+    </center>
+</BorderPane>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<!-- Login Screen: Apple-inspired centered card -->
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.library.controller.LoginController"
+           styleClass="login-container"
+           prefWidth="900" prefHeight="600">
+
+    <VBox styleClass="login-card" alignment="CENTER" spacing="4">
+
+        <!-- App Icon (Unicode book emoji as placeholder) -->
+        <Label text="📚" styleClass="login-icon" />
+
+        <!-- Title -->
+        <Label text="Library System" styleClass="login-title" />
+        <Label text="Sign in to continue" styleClass="login-subtitle" />
+
+        <!-- Username -->
+        <VBox spacing="4">
+            <padding><Insets top="8" /></padding>
+            <Label text="Username" styleClass="form-label" />
+            <TextField fx:id="usernameField"
+                       promptText="Enter your username"
+                       styleClass="text-field" />
+        </VBox>
+
+        <!-- Password -->
+        <VBox spacing="4">
+            <padding><Insets top="12" /></padding>
+            <Label text="Password" styleClass="form-label" />
+            <PasswordField fx:id="passwordField"
+                           promptText="Enter your password"
+                           styleClass="password-field" />
+        </VBox>
+
+        <!-- Error Label -->
+        <Label fx:id="errorLabel" styleClass="error-label" visible="false" managed="false">
+            <padding><Insets top="8" /></padding>
+        </Label>
+
+        <!-- Login Button -->
+        <VBox spacing="8">
+            <padding><Insets top="20" /></padding>
+            <Button text="Sign In"
+                    fx:id="loginButton"
+                    onAction="#handleLogin"
+                    styleClass="btn-primary"
+                    maxWidth="Infinity" />
+        </VBox>
+
+        <!-- Footer info -->
+        <VBox alignment="CENTER">
+            <padding><Insets top="20" /></padding>
+            <Label text="Admin: admin / admin123" styleClass="muted-text" />
+            <Label text="Student: john.doe / student123" styleClass="muted-text" />
+        </VBox>
+    </VBox>
+</StackPane>
